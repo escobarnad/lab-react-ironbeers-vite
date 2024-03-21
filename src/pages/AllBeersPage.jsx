@@ -21,7 +21,6 @@ function AllBeersPage() {
   if (!beers) {
     return <p>Loading...</p>;
   }
-  console.log(beers);
 
   return (
     <div>
