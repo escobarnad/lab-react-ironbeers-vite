@@ -2,31 +2,33 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 function AllBeersPage() {
-  const [beers, setBeers] = useState();
+  const [beers, setBeers] = useState([]);
   const [searchWord, setSearchWord] = useState("");
 
   const API_URL = "https://ih-beers-api2.herokuapp.com/beers";
 
-  const fetchAllBeers = async () => {
-    const response = await fetch(`${API_URL}`);
-    if (response.ok) {
-      const allBeers = await response.json();
-      setBeers(allBeers);
+  const fetchBeersBySearch = async (query) => {
+    try {
+      const response = await fetch(`${API_URL}/search?q=${query}`);
+      if (response.ok) {
+        const filteredBeers = await response.json();
+        setBeers(filteredBeers);
+      } else {
+        console.error("Failed to fetch beers by search");
+      }
+    } catch (error) {
+      console.error("Error fetching beers by search:", error);
     }
   };
 
   const handleChange = (e) => {
     const searchValue = e.target.value.toLowerCase();
     setSearchWord(searchValue);
-
-    const filtered = beers.filter((beer) => {
-      return beer.name.toLowerCase().includes(searchValue);
-    });
-    setBeers(filtered);
+    fetchBeersBySearch(searchValue);
   };
 
   useEffect(() => {
-    fetchAllBeers();
+    fetchBeersBySearch("");
   }, []);
 
   if (!beers) {
@@ -46,21 +48,18 @@ function AllBeersPage() {
           )}
         </label>
       </form>
-      {beers &&
-        beers.map((beer) => {
-          return (
-            <Link to={`/beers/${beer._id}`} key={beer._id}>
-              <img
-                src={beer.image_url}
-                alt={`${beer.name} image`}
-                style={{ height: "10rem" }}
-              />
-              <h2>{beer.name}</h2>
-              <h3>{beer.tagline}</h3>
-              <p>{beer.contributed_by}</p>
-            </Link>
-          );
-        })}
+      {beers.map((beer) => (
+        <Link to={`/beers/${beer._id}`} key={beer._id}>
+          <img
+            src={beer.image_url}
+            alt={`${beer.name} image`}
+            style={{ height: "10rem" }}
+          />
+          <h2>{beer.name}</h2>
+          <h3>{beer.tagline}</h3>
+          <p>{beer.contributed_by}</p>
+        </Link>
+      ))}
     </div>
   );
 }
